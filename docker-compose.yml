@@ -56,6 +56,7 @@ services:
       - "3307:3306" # Mappe le port 3306 du conteneur au port 3307 de l'hôte
     volumes:
       - mysql_data:/var/lib/mysql # Pour persister les données de la base de données
+      - ./mysql-initdb:/docker-entrypoint-initdb.d # AJOUTEZ CETTE LIGNE
     healthcheck: # Vérification de santé pour s'assurer que MySQL est prêt
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p0000"]
       timeout: 20s
@@ -69,4 +70,3 @@ volumes:
   sonarqube_logs:
   postgresql_data:
   mysql_data: # Nouveau volume pour les données MySQL
-
