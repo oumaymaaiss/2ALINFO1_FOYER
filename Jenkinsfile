@@ -28,7 +28,9 @@ pipeline {
         stage('Build') {
             steps {
                 // Exécuter le build Maven
+                echo 'Starting Maven Build...'
                 sh 'mvn clean package -DskipTests'
+                echo 'Maven Build Finished.'
             }
         }
 
