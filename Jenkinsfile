@@ -37,7 +37,8 @@ pipeline {
         stage('Test') {
             steps {
                 // Exécuter les tests unitaires Maven
-                sh 'mvn test'
+                // Activation du profil 'test' pour que Spring Boot utilise application-test.properties
+                sh "mvn test -Dspring.profiles.active=test"
             }
         }
 

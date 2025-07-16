@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts-jdk17
+    privileged: true
+    user: root
+    ports:
+      - "8082:8080" # Mappe le port 8080 du conteneur Jenkins au port 8082 de l'hôte
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/mvn:/usr/local/bin/mvn # Assurez-vous que Maven est accessible ici si vous l'utilisez
+      - /root/.m2:/var/jenkins_home/.m2 # Partage le cache Maven
+    depends_on:
+      - db # Dépendance pour SonarQube
+      - mysql_db # Nouvelle dépendance pour MySQL
+
+  sonarqube:
+    container_name: sonarqube
+    image: sonarqube:lts-community
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/sonarqube
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    depends_on:
+      - db
+
+  db: # PostgreSQL pour SonarQube
+    container_name: sonarqube_db
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonarqube
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+
+  mysql_db: # Service MySQL pour votre application
+    container_name: foyer_mysql_db
+    image: mysql:8.0 # Vous pouvez spécifier une autre version si nécessaire
+    environment:
+      MYSQL_ROOT_PASSWORD: 0000 # Mot de passe root pour MySQL
+      MYSQL_DATABASE: foyer # Nom de la base de données pour votre application
+    ports:
+      - "3307:3306" # Mappe le port 3306 du conteneur au port 3307 de l'hôte
+    volumes:
+      - mysql_data:/var/lib/mysql # Pour persister les données de la base de données
+    healthcheck: # Vérification de santé pour s'assurer que MySQL est prêt
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p0000"]
+      timeout: 20s
+      retries: 10
+      start_period: 10s # Temps d'attente initial avant de commencer les vérifications
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql_data:
+  mysql_data: # Nouveau volume pour les données MySQL
+
