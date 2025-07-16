@@ -84,8 +84,10 @@ pipeline {
 
     post {
         always {
-            // Nettoyage après chaque build (succès ou échec)
-            cleanWs()
+            // cleanWs() doit être dans un contexte de nœud pour fonctionner correctement
+            script {
+                cleanWs()
+            }
         }
         success {
             echo 'Pipeline terminé avec succès !'
