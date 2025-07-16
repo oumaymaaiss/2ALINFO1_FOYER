@@ -86,9 +86,10 @@ pipeline {
 
     post {
         always {
-            // cleanWs() doit être dans un contexte de nœud pour fonctionner correctement
             script {
-                cleanWs()
+                node { // Ajoutez ce bloc node
+                    cleanWs()
+                } // Fermez le bloc node
             }
         }
         success {
