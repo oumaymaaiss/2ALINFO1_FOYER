@@ -13,6 +13,11 @@ import java.util.List;
 public class BlocRestController {
     IBlocService service;
 
+    @GetMapping("/test")
+    public String test() {
+        return "Service is up";
+    }
+
     @PostMapping("addOrUpdate")
     Bloc addOrUpdate(@RequestBody Bloc b) {
         return service.addOrUpdate(b);
